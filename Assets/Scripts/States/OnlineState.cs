@@ -9,6 +9,7 @@ public class OnlineState : GameState
     private const string HEADING_COMMAND = "Heading";
     private const string WORLD_DELTA_MESSAGE_TYPE = "WorldDelta";
     private const string NEW_REMOTE_ACTOR_MESSAGE_TYPE = "NewRemoteActor";
+    private const string REMOVE_REMOTE_ACTOR_MESSAGE_TYPE = "RemoveRemoteActor";
 
     private NetworkManager _NetworkManager;
     private float inputTimer;
@@ -109,11 +110,20 @@ public class OnlineState : GameState
                     case NEW_REMOTE_ACTOR_MESSAGE_TYPE:
                         SpawnNewRemoteActor( parts[2] );
                         break;
+                    case REMOVE_REMOTE_ACTOR_MESSAGE_TYPE:
+                        RemoveRemoteActor( parts[2] );
+                        break;
                     default:
                         break;
                 }
             }
         }
+    }
+
+    private void RemoveRemoteActor( string payload )
+    {
+        string[] keyVal = payload.Split(':');
+        _GM.DispatchEvent( new RemoveRemoteActorEvent( keyVal[1] ) );
     }
 
     private void SpawnNewRemoteActor( string payload )

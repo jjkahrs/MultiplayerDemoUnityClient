@@ -33,8 +33,19 @@ public class RemoteActorController : MonoBehaviour
     {
         _GM.Subscribe( typeof( StateChangeEvent ), OnStateChange, this );
         _GM.Subscribe( typeof( SpawnRemoteActorEvent ), OnSpawnRemoteActor, this );
+        _GM.Subscribe( typeof( RemoveRemoteActorEvent ), OnRemoveRemoteActor, this );
         lastFrameRendered = -1;
         localTickInterval = GameStore.STATE_UPDATE_INTERVAL;
+    }
+
+    void OnRemoveRemoteActor( GameEvent gameEvent )
+    {
+        if( gameEvent is RemoveRemoteActorEvent removeEvent )
+        {
+            GameObject obj = remoteActors[ removeEvent.id ];
+            remoteActors.Remove( removeEvent.id );
+            GameObject.Destroy( obj );
+        }
     }
 
     void OnSpawnRemoteActor( GameEvent gameEvent )
