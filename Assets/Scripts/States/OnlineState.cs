@@ -1,3 +1,5 @@
+#undef DEBUG_NETWORK_MESSAGES
+
 using System.Collections;
 using System.Collections.Generic;
 using System;
@@ -10,10 +12,14 @@ public class OnlineState : GameState
     private const string WORLD_DELTA_MESSAGE_TYPE = "WorldDelta";
     private const string NEW_REMOTE_ACTOR_MESSAGE_TYPE = "NewRemoteActor";
     private const string REMOVE_REMOTE_ACTOR_MESSAGE_TYPE = "RemoveRemoteActor";
+    private const float TURN_SPEED = 500f;
 
     private NetworkManager _NetworkManager;
     private float inputTimer;
     private float stateTimer;
+
+    private float horizontalInput;
+    private float verticalInput;
 
     public override void Init()
     {
@@ -27,32 +33,47 @@ public class OnlineState : GameState
 
     private void OnKeyboard( GameEvent gameEvent )
     {
-
         if( gameEvent is KeyboardEvent ke )
         {
             if( ke.keyCode == KeyCode.W )
-                _GM.GetGameStore().localActor.headingNormal += ke.isDown ? Vector3.forward : Vector3.back;
+                _GM.GetGameStore().inputVector += ke.isDown ? Vector3.forward : Vector3.back;
             else if( ke.keyCode == KeyCode.S )
-                _GM.GetGameStore().localActor.headingNormal += ke.isDown ? Vector3.back : Vector3.forward;
+                _GM.GetGameStore().inputVector += ke.isDown ? Vector3.back : Vector3.forward;
             else if( ke.keyCode == KeyCode.A )
-                _GM.GetGameStore().localActor.headingNormal += ke.isDown ? Vector3.left : Vector3.right;
+                _GM.GetGameStore().inputVector += ke.isDown ? Vector3.left : Vector3.right;
             else if( ke.keyCode == KeyCode.D )
-                _GM.GetGameStore().localActor.headingNormal += ke.isDown ? Vector3.right : Vector3.left;
+                _GM.GetGameStore().inputVector += ke.isDown ? Vector3.right : Vector3.left;
         }
     }
 
     public override void OnFrame()
     {
         inputTimer += Time.deltaTime;
+        bool isFreelook = Input.GetMouseButton( 0 );
+        bool isMouseNav = Input.GetMouseButton( 1 );
 
-            PlayerInputFrame inputFrame = new PlayerInputFrame();
-            inputFrame.inputHeading = _GM.GetGameStore().localActor.headingNormal;
-            inputFrame.inputSpeed = _GM.GetGameStore().localActor.speed;
-            inputFrame.inputTick = _GM.GetGameStore().gameTick;
-            inputFrame.inputPosition = _GM.GetGameStore().localActor.position;
-            inputFrame.inputDuration = Convert.ToInt64(Time.deltaTime * 1000);
+        horizontalInput = Input.GetAxisRaw( "Mouse X" );
+        verticalInput = Input.GetAxisRaw( "Mouse Y" );
 
-            long timestamp = _GM.GetGameStore().AddPlayerInputFrame( inputFrame ).inputTimestamp;
+        if(isMouseNav && horizontalInput != 0f )
+        {            
+            float rotationAngle = TURN_SPEED * Time.deltaTime * horizontalInput;
+            Vector3 newFacing = Quaternion.AngleAxis( rotationAngle, Vector3.up ) * _GM.GetGameStore().localActor.facing;
+
+            _GM.GetGameStore().localActor.facing = newFacing;
+        }
+
+        _GM.GetGameStore().localActor.headingNormal = _GM.GetGameStore().localActor.facing * _GM.GetGameStore().inputVector.z;
+
+        PlayerInputFrame inputFrame = new PlayerInputFrame();
+        inputFrame.inputHeading = _GM.GetGameStore().localActor.headingNormal;
+        inputFrame.inputSpeed = _GM.GetGameStore().localActor.speed;
+        inputFrame.inputTick = _GM.GetGameStore().gameTick;
+        inputFrame.inputPosition = _GM.GetGameStore().localActor.position;
+        inputFrame.inputDuration = Convert.ToInt64(Time.deltaTime * 1000);
+        inputFrame.inputFacing = _GM.GetGameStore().localActor.facing;
+
+        long timestamp = _GM.GetGameStore().AddPlayerInputFrame( inputFrame ).inputTimestamp;
 
         if( inputTimer >= INPUT_SEND_INTERVAL )
         {
@@ -75,7 +96,10 @@ public class OnlineState : GameState
             string message = inputFrame.BuildSendMessage();
             _GM.GetGameStore().playerInputFrames.Clear();
 
+            #if DEBUG_NETWORK_MESSAGES
             Debug.Log($"===> {message}");
+            #endif
+
             _NetworkManager.Send( message );
         }
 
@@ -96,7 +120,9 @@ public class OnlineState : GameState
                 if( data == "")
                     continue;
 
+                #if DEBUG_NETWORK_MESSAGES
                 Debug.Log($"<=== Online State data: {data}");
+                #endif
 
                 string[] parts = data.Split("|");
                 long msgTimestamp = long.Parse(parts[0]);

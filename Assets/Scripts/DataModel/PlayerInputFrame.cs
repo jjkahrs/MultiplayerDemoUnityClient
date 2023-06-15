@@ -14,6 +14,7 @@ public class PlayerInputFrame
     public float inputSpeed;
     public Vector3 inputPosition;
     public long inputDuration;
+    public Vector3 inputFacing;
 
     public string BuildSendMessage()
     {
@@ -26,7 +27,11 @@ public class PlayerInputFrame
         sb.Append("duration:").Append(inputDuration).Append(",");
         sb.Append("headingX:").Append(inputHeading.x).Append(",");
         sb.Append("headingY:").Append(inputHeading.y).Append(",");
-        sb.Append("headingZ:").Append(inputHeading.z);
+        sb.Append("headingZ:").Append(inputHeading.z).Append(",");
+
+        sb.Append("facingX:").Append(inputFacing.x).Append(",");
+        sb.Append("facingY:").Append(inputFacing.y).Append(",");
+        sb.Append("facingZ:").Append(inputFacing.z);
 
         return sb.ToString();
     }

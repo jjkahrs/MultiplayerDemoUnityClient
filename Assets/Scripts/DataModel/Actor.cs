@@ -11,6 +11,8 @@ public class Actor
     public Vector3 headingNormal;
     public float speed;
 
+    public Vector3 facing;
+
     public Actor( string id )
     {
         this.id = id;
@@ -18,6 +20,7 @@ public class Actor
         this.position = Vector3.zero;
         this.headingNormal = Vector3.zero;
         this.speed = 0f;
+        this.facing = Vector3.forward;
     }
 
     public static Actor Parse( string segment )
@@ -26,6 +29,7 @@ public class Actor
 
         Vector3 pos = Vector3.zero;
         Vector3 heading = Vector3.zero;
+        Vector3 facing = Vector3.forward;
         float speed = 0f;
         string sessionId = "";
 
@@ -64,6 +68,16 @@ public class Actor
                 case "speed":
                     speed = float.Parse( value );
                     break;
+                case "facingX":
+                    facing.x = Convert.ToSingle( value );
+                    break;
+                case "facingY":
+                    facing.y = Convert.ToSingle( value );
+                    break;
+                case "facingZ":
+                    facing.z = Convert.ToSingle( value );
+                    break;
+
                 default:
                     break;
             }
@@ -74,6 +88,7 @@ public class Actor
         actor.position = pos;
         actor.headingNormal = heading;
         actor.speed = speed;
+        actor.facing = facing;
 
         return actor;
     }

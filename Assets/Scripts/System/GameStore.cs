@@ -22,9 +22,13 @@ public class GameStore {
     public List<PlayerInputFrame> playerInputFrames = new List<PlayerInputFrame>();
 
     public FrameSnapshot lastFrameFromServer = null;
+    public Vector3 inputVector;
+    public Vector3 cameraVector;
 
     public GameStore() {    
-        gameTick = 0;    
+        gameTick = 0;   
+        inputVector = Vector3.zero;
+        cameraVector = Vector3.zero; 
     }
 
     public FrameSnapshot GetCurrentFrameSnapshot()

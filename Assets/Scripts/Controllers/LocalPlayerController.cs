@@ -39,6 +39,10 @@ public class LocalPlayerController : MonoBehaviour
         if( !isOnline )
             return;
 
+        Vector3 flatFacing = Vector3.ProjectOnPlane( _GM.GetGameStore().localActor.facing, Vector3.up );
+        float angle = Vector3.SignedAngle( transform.forward, flatFacing, Vector3.up );
+        transform.RotateAround( transform.position, Vector3.up, angle );
+
         // Go ahead and optimistically move the local player
         transform.position += ( _GM.GetGameStore().localActor.headingNormal * _GM.GetGameStore().localActor.speed * Time.deltaTime);
         _GM.GetGameStore().localActor.position = transform.position;
@@ -62,7 +66,13 @@ public class LocalPlayerController : MonoBehaviour
 
         // Code to update the server "ghost" for testing purposes.
         if( _GM.GetGameStore().GetCurrentFrameSnapshot() != null )
+        {
             ghost.transform.position = _GM.GetGameStore().GetCurrentFrameSnapshot().localActor.position;
+            Vector3 ghostFacing = Vector3.ProjectOnPlane( _GM.GetGameStore().GetCurrentFrameSnapshot().localActor.facing, Vector3.up );
+
+            if( ghostFacing != Vector3.zero )
+                ghost.transform.rotation =  Quaternion.LookRotation( ghostFacing, Vector3.up );
+        }
     }
 
     void OnDestroy()

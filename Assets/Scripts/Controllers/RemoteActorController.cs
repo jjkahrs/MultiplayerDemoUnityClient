@@ -10,10 +10,6 @@ public class RemoteActorController : MonoBehaviour
     private float lerpTimer = 0;
     private float lerpStartTime = 0;
 
-    // private Vector3 previousPosition = Vector3.zero;
-    // private Vector3 currentPosition = Vector3.zero;
-    // private float distance;
-    // private float currentSpeed;
     private float duration;
     private long lastFrameRendered;
 
@@ -88,9 +84,7 @@ public class RemoteActorController : MonoBehaviour
 
     void Update()
     {
-        // NOTE: This is temporary. We're testing this before moving this logic to remote Actor controllers
         // Lerp between the previous frame and the most recent frame from the server.
-        //this.transform.position = _GM.GetGameStore().localActor.position;
 
         tickTimer += Time.deltaTime;
 
@@ -105,17 +99,11 @@ public class RemoteActorController : MonoBehaviour
                 return;
             }
 
-            // Normally we'd look up Actor based on ID. Here we know we're the local player
             lastFrameRendered = currentFrame.tick;
             lerpTimer = 0;
             lerpStartTime = Time.time;
-            //previousPosition = previousFrame.localActor.position;
-            //currentPosition = currentFrame.localActor.position;
-            //currentSpeed = previousFrame.localActor.speed;
             duration = currentFrame.tickInterval;
             localTickInterval = currentFrame.tickInterval;
-
-            //Debug.Log($"TBF={currentFrame.timestamp - previousFrame.timestamp} position={transform.position}  {currentFrame.transitTimeMillis} {currentFrame.tick} currentPosition={currentPosition}  {previousFrame.transitTimeMillis} {previousFrame.tick} previousPosition={previousPosition}");
         }
         
         if( currentFrame != null && previousFrame != null )
@@ -135,8 +123,11 @@ public class RemoteActorController : MonoBehaviour
                 if(! remoteActors.TryGetValue( previousActor.id, out obj ) )
                     continue;
 
-                //if( obj.transform.position != Vector3.zero && currentPosition != Vector3.zero )
-                    distance = Vector3.Distance( obj.transform.position, currentPosition );
+                // Adjust Facing
+                Vector3 newFacing = Vector3.ProjectOnPlane( previousActor.facing, Vector3.up );
+                obj.transform.rotation =  Quaternion.LookRotation( newFacing );
+
+                distance = Vector3.Distance( obj.transform.position, currentPosition );
 
                 if( distance != 0 )
                 {
@@ -145,7 +136,6 @@ public class RemoteActorController : MonoBehaviour
 
                     lerpTimer += Time.deltaTime;
                     obj.transform.position = newPosition;
-                    //Debug.Log($"@@@ Distance Remaining {Vector3.Distance( transform.position, currentPosition )}");
                 }
             }
         }
