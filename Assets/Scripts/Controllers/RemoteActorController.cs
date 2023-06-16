@@ -8,6 +8,7 @@ public class RemoteActorController : MonoBehaviour
     private GameMaster _GM;
     private float tickTimer = 0;
     private float lerpTimer = 0;
+    private float rotLerpTimer = 0;
     private float lerpStartTime = 0;
 
     private float duration;
@@ -101,6 +102,7 @@ public class RemoteActorController : MonoBehaviour
 
             lastFrameRendered = currentFrame.tick;
             lerpTimer = 0;
+            rotLerpTimer = 0;
             lerpStartTime = Time.time;
             duration = currentFrame.tickInterval;
             localTickInterval = currentFrame.tickInterval;
@@ -110,34 +112,46 @@ public class RemoteActorController : MonoBehaviour
         {
             foreach( Actor previousActor in previousFrame.remoteActors )
             {
-                float distance = 0f;
-
                 Actor currentActor = currentFrame.FindRemoteActorById( previousActor.id );
                 if( currentActor == null )
                     continue;
-
-                Vector3 currentPosition = currentActor.position;
-                Vector3 previousPosition = previousActor.position;
 
                 GameObject obj;
                 if(! remoteActors.TryGetValue( previousActor.id, out obj ) )
                     continue;
 
-                // Adjust Facing
-                Vector3 newFacing = Vector3.ProjectOnPlane( previousActor.facing, Vector3.up );
-                obj.transform.rotation =  Quaternion.LookRotation( newFacing );
-
-                distance = Vector3.Distance( obj.transform.position, currentPosition );
-
-                if( distance != 0 )
-                {
-                    float timeLeft = lerpTimer / duration; 
-                    Vector3 newPosition = Vector3.Lerp( previousPosition, currentPosition, timeLeft );
-
-                    lerpTimer += Time.deltaTime;
-                    obj.transform.position = newPosition;
-                }
+                UpdateRotation( obj, currentActor, previousActor );
+                UpdatePosition( obj, currentActor, previousActor );
             }
+        }
+    }
+
+    void UpdatePosition( GameObject obj, Actor currentActor, Actor previousActor )
+    {
+        Vector3 currentPosition = currentActor.position;
+        Vector3 previousPosition = previousActor.position;
+
+        float distance = Vector3.Distance( obj.transform.position, currentPosition );
+
+        if( distance != 0 )
+        {
+            float timeLeft = lerpTimer / duration; 
+            Vector3 newPosition = Vector3.Lerp( previousPosition, currentPosition, timeLeft );
+            lerpTimer += Time.deltaTime;
+            obj.transform.position = newPosition;
+        }
+
+    }
+
+    void UpdateRotation( GameObject obj, Actor currentActor, Actor previousActor )
+    {
+        float angle = Quaternion.Angle( obj.transform.rotation, Quaternion.LookRotation( currentActor.facing ) );
+
+        if( angle != 0 )
+        {
+            float timeLeftRot = rotLerpTimer / duration;
+            rotLerpTimer += Time.deltaTime;
+            obj.transform.rotation = Quaternion.Lerp( Quaternion.LookRotation( previousActor.facing ), Quaternion.LookRotation( currentActor.facing ), timeLeftRot );
         }
     }
 
