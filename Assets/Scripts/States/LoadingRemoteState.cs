@@ -49,7 +49,6 @@ public class LoadingRemoteState : GameState
 
         if( hasPlayerLoaded && hasWorldLoaded )
         {
-            Debug.Log($"%%% updateLocalPlayerState _GM.GetGameStore().localActor.position={_GM.GetGameStore().localActor.position}");
             this.SetNextState( new OnlineState() );
             _GM.ChangeState();
         }
@@ -69,7 +68,7 @@ public class LoadingRemoteState : GameState
         string timeStampString = parts[0];
         string messageType = parts[1];
         string payload = parts[2];
-//Debug.Log($"messageType {messageType}");
+
         switch( messageType )
         {
             case PLAYER_STATE_MSG:

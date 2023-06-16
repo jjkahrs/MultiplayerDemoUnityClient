@@ -1,5 +1,3 @@
-#undef DEBUG_NETWORK_MESSAGES
-
 using System.Collections;
 using System.Collections.Generic;
 using System;
@@ -96,9 +94,7 @@ public class OnlineState : GameState
             string message = inputFrame.BuildSendMessage();
             _GM.GetGameStore().playerInputFrames.Clear();
 
-            #if DEBUG_NETWORK_MESSAGES
-            Debug.Log($"===> {message}");
-            #endif
+            //Debug.Log($"===> {message}");
 
             _NetworkManager.Send( message );
         }
@@ -120,9 +116,7 @@ public class OnlineState : GameState
                 if( data == "")
                     continue;
 
-                #if DEBUG_NETWORK_MESSAGES
-                Debug.Log($"<=== Online State data: {data}");
-                #endif
+                //Debug.Log($"<=== Online State data: {data}");
 
                 string[] parts = data.Split("|");
                 long msgTimestamp = long.Parse(parts[0]);

@@ -27,7 +27,6 @@ public class NetworkManager : MonoBehaviour
 
     public void Connect(string sessionToken )
     {
-        Debug.Log("Connect() called");
         StartCoroutine( ConnectToServer( HOST_IP, PORT, sessionToken ) );
     }
 
