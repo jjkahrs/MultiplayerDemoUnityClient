@@ -8,7 +8,7 @@ All communication is done via TCP so this demo isn't an example for a low-tolera
 
 ## Server Implementations
 The available server implementations can be found here:
-- [NodeJS](https://https://github.com/jjkahrs/multiplayer-demo-server-ts)
+- [NodeJS](https://github.com/jjkahrs/multiplayer-demo-server-ts)
 
 ## Message Format
 The client uses a custom message format for what is probably a very tiny performance improvement. To date, I have not run metrics against the use of JSON to compare. Messages are divided into segments that are pipe "|" delimited. The first segment is the Unix timestamp of the message's creation date (not the arrival date). The second segment is the message type. Other segments are optional. The end of the message is terminated with ";".
